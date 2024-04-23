@@ -1,8 +1,8 @@
 import java.util.Scanner;
 
 public class SudokuGame {
-    private SudokuBoard board;
-    private Scanner scanner;
+    final private SudokuBoard board;
+    final private Scanner scanner;
 
     public SudokuGame(int size) {
         this.board = new SudokuBoard(size);
@@ -12,10 +12,13 @@ public class SudokuGame {
     public void startGame() {
         System.out.println("Welcome to Sudoku!");
 
-        SudokuGenerator generator = new SudokuGenerator(board.getSize());
+        // Prompt the user to choose difficulty
+        int difficulty = chooseDifficulty();
+        SudokuGenerator generator = new SudokuGenerator(board.getSize(), difficulty);
         int[][] sudokuGrid = generator.getSudokuGrid();
         populateBoard(sudokuGrid);
 
+        // Game loop
         while (!isGameFinished()) {
             System.out.println("\nCurrent board:");
             board.printBoard();
@@ -45,6 +48,17 @@ public class SudokuGame {
         System.out.println("\nCongratulations! You've completed the Sudoku puzzle.");
     }
 
+    private int chooseDifficulty() {
+        System.out.println("Choose difficulty level:");
+        System.out.println("1. Easy");
+        System.out.println("2. Medium");
+        System.out.println("3. Hard");
+        System.out.print("Enter the number corresponding to your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+        return choice;
+    }
     private Move parseMove(String input) {
         String[] parts = input.split(" ");
         if (parts.length == 3) {

@@ -13,15 +13,6 @@ public class SudokuBoard {
         }
     }
 
-    // Initialize the board with zeros (empty cells)
-    private void initializeBoard() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                board[i][j] = 0;
-            }
-        }
-    }
-
     // Get the value of a cell in the board
     public int getCellValue(int row, int col) {
         return board[row][col];

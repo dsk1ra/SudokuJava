@@ -1,6 +1,6 @@
 public class SudokuSolver {
-    private int[][] board;
-    private int size;
+    final private int[][] board;
+    final private int size;
 
     public SudokuSolver(int[][] board) {
         this.board = board;

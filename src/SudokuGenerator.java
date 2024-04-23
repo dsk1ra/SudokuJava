@@ -5,20 +5,27 @@ public class SudokuGenerator {
     private final int size;
     private final Random random;
 
-    public SudokuGenerator(int size) {
+    public SudokuGenerator(int size, int difficulty) {
         this.size = size;
         this.grid = new int[size][size];
         this.random = new Random();
-        generateSudoku();
+        generateSudoku(difficulty);
     }
 
-    private void generateSudoku() {
-        fillDiagonalSubgrids();
+    private void generateSudoku(int difficulty) {
+        fillDiagonalSubgrid();
         solveSudoku();
-        removeNumbers();
+        int filledCellsPercentage = switch (difficulty) {
+            case 1 -> 50;
+            case 2 -> 40;
+            case 3 -> 30;
+            default -> 50; // Default to easy difficulty
+        };
+        removeNumbers(filledCellsPercentage);
     }
 
-    private void fillDiagonalSubgrids() {
+
+    private void fillDiagonalSubgrid() {
         int subgridSize = (int) Math.sqrt(size);
         for (int i = 0; i < size; i += subgridSize) {
             fillSubgrid(i, i);
@@ -112,8 +119,8 @@ public class SudokuGenerator {
         }
     }
 
-    private void removeNumbers() {
-        int cellsToRemove = size * size / 2; // Remove half of the numbers
+    private void removeNumbers(int filledCellsPercentage) {
+        int cellsToRemove = (size * size * (100 - filledCellsPercentage)) / 100;
         while (cellsToRemove > 0) {
             int row = random.nextInt(size);
             int col = random.nextInt(size);
@@ -124,19 +131,22 @@ public class SudokuGenerator {
         }
     }
 
+
     public int[][] getSudokuGrid() {
         return grid;
     }
 
     public static void main(String[] args) {
         int size = 9; // Default size for a 9x9 Sudoku puzzle
-        SudokuGenerator generator = new SudokuGenerator(size);
+        int difficulty = 1; // Default difficulty (you can change this as needed)
+        SudokuGenerator generator = new SudokuGenerator(size, difficulty);
         int[][] sudokuGrid = generator.getSudokuGrid();
 
         // Display the generated Sudoku grid
         System.out.println("Generated Sudoku Grid:");
         printSudokuGrid(sudokuGrid);
     }
+
 
     private static void printSudokuGrid(int[][] sudokuGrid) {
         for (int i = 0; i < sudokuGrid.length; i++) {
