@@ -1,51 +1,81 @@
 import java.util.Scanner;
 
 public class SudokuGame {
-    final private SudokuBoard board;
-    final private Scanner scanner;
+    private SudokuBoard board;
+    private Scanner scanner;
+    private boolean playWithTimer;
+    private TimerThread timerThread;
 
     public SudokuGame(int size) {
         this.board = new SudokuBoard(size);
         this.scanner = new Scanner(System.in);
+        this.playWithTimer = false; // Default to not playing with a timer
     }
 
     public void startGame() {
         System.out.println("Welcome to Sudoku!");
 
-        // Prompt the user to choose difficulty
-        int difficulty = chooseDifficulty();
-        SudokuGenerator generator = new SudokuGenerator(board.getSize(), difficulty);
+        // Prompt the user to choose whether to play with a timer
+        chooseTimerOption();
+
+        SudokuGenerator generator = new SudokuGenerator(board.getSize(), chooseDifficulty());
         int[][] sudokuGrid = generator.getSudokuGrid();
         populateBoard(sudokuGrid);
+
+        // Start the timer thread if the player chose to play with it
+        if (playWithTimer) {
+            timerThread = new TimerThread();
+            timerThread.start();
+        }
 
         // Game loop
         while (!isGameFinished()) {
             System.out.println("\nCurrent board:");
             board.printBoard();
             System.out.println("Enter your move (row column value), 'solve' to solve the puzzle, or 'q' to quit:");
-            String input = scanner.nextLine();
 
-            if (input.equalsIgnoreCase("q")) {
-                System.out.println("Quitting the game.");
-                return;
-            } else if (input.equalsIgnoreCase("solve")) {
-                solveBoard();
-                return;
+            // Read user input asynchronously
+            String input = null;
+            if (scanner.hasNextLine()) {
+                input = scanner.nextLine();
             }
 
-            Move move = parseMove(input);
-            if (move != null) {
-                if (board.isValidMove(move.getRow(), move.getCol(), move.getValue())) {
-                    board.setCellValue(move.getRow(), move.getCol(), move.getValue());
-                } else {
-                    System.out.println("Invalid move! Please try again.");
+            if (input != null) {
+                if (input.equalsIgnoreCase("q")) {
+                    System.out.println("Quitting the game.");
+                    if (playWithTimer && timerThread != null) {
+                        timerThread.stopTimer();
+                    }
+                    break;
+                } else if (input.equalsIgnoreCase("solve")) {
+                    solveBoard();
+                    if (playWithTimer && timerThread != null) {
+                        timerThread.stopTimer();
+                    }
+                    break;
                 }
-            } else {
-                System.out.println("Invalid input! Please enter in the format 'row column value'.");
+
+                Move move = parseMove(input);
+                if (move != null) {
+                    if (board.isValidMove(move.getRow(), move.getCol(), move.getValue())) {
+                        board.setCellValue(move.getRow(), move.getCol(), move.getValue());
+                    } else {
+                        System.out.println("Invalid move! Please try again.");
+                    }
+                } else {
+                    System.out.println("Invalid input! Please enter in the format 'row column value'.");
+                }
             }
         }
 
-        System.out.println("\nCongratulations! You've completed the Sudoku puzzle.");
+        // Display congratulations message
+        System.out.println("Congratulations! You've completed the Sudoku puzzle.");
+    }
+
+    private void chooseTimerOption() {
+        System.out.println("Do you want to play with a timer? (yes/no)");
+        String choice = scanner.nextLine();
+        playWithTimer = choice.equalsIgnoreCase("yes");
     }
 
     private int chooseDifficulty() {
@@ -59,6 +89,7 @@ public class SudokuGame {
         scanner.nextLine(); // Consume newline character
         return choice;
     }
+
     private Move parseMove(String input) {
         String[] parts = input.split(" ");
         if (parts.length == 3) {
@@ -97,8 +128,6 @@ public class SudokuGame {
         }
     }
 
-
-
     private boolean isGameFinished() {
         // Check if all cells are filled
         for (int i = 0; i < board.getSize(); i++) {
@@ -122,6 +151,29 @@ public class SudokuGame {
         }
 
         return true;
+    }
+
+    private class TimerThread extends Thread {
+        private volatile boolean running = true;
+
+        @Override
+        public void run() {
+            int seconds = 0;
+
+            while (running) {
+                System.out.print("\rTime elapsed: " + seconds + " seconds");
+                seconds++;
+                try {
+                    Thread.sleep(1000); // Sleep for 1 second
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void stopTimer() {
+            running = false;
+        }
     }
 
     public static void main(String[] args) {
