@@ -5,11 +5,11 @@ public class SudokuGenerator {
     private final int size;
     private final Random random;
 
-    public SudokuGenerator(int size, int difficulty) {
-        this.size = size;
+    public SudokuGenerator(GameConfig config) {
+        this.size = config.getSize();
         this.grid = new int[size][size];
         this.random = new Random();
-        generateSudoku(difficulty);
+        generateSudoku(config.getDifficulty());
     }
 
     private void generateSudoku(int difficulty) {
@@ -131,22 +131,9 @@ public class SudokuGenerator {
         }
     }
 
-
     public int[][] getSudokuGrid() {
         return grid;
     }
-
-    public static void main(String[] args) {
-        int size = 9; // Default size for a 9x9 Sudoku puzzle
-        int difficulty = 1; // Default difficulty (you can change this as needed)
-        SudokuGenerator generator = new SudokuGenerator(size, difficulty);
-        int[][] sudokuGrid = generator.getSudokuGrid();
-
-        // Display the generated Sudoku grid
-        System.out.println("Generated Sudoku Grid:");
-        printSudokuGrid(sudokuGrid);
-    }
-
 
     private static void printSudokuGrid(int[][] sudokuGrid) {
         for (int i = 0; i < sudokuGrid.length; i++) {
