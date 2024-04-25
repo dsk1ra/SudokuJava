@@ -15,12 +15,17 @@ public class SudokuGenerator {
     private void generateSudoku(int difficulty) {
         fillDiagonalSubgrid();
         solveSudoku();
-        int filledCellsPercentage = switch (difficulty) {
-            case 1 -> 50;
-            case 2 -> 40;
-            case 3 -> 30;
-            default -> 50; // Default to easy difficulty
-        };
+        int filledCellsPercentage;
+        if (difficulty < 0) {
+            filledCellsPercentage = -difficulty; // Custom difficulty, use the absolute value
+        } else {
+            filledCellsPercentage = switch (difficulty) {
+                case 1 -> 50;
+                case 2 -> 40;
+                case 3 -> 30;
+                default -> 50; // Default to easy difficulty
+            };
+        }
         removeNumbers(filledCellsPercentage);
     }
 

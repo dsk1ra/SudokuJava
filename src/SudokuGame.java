@@ -15,19 +15,22 @@ public class SudokuGame {
     private boolean[][] generatedCells;
     private final List<Move> moves;
     private int[][] startBoard;
+    private MoveHistory moveHistory;
 
-
-    public void clearBoard() {
-        board = new SudokuBoard(board.getSize());
-        moves.clear();
-        generatedCells = new boolean[board.getSize()][board.getSize()];
-    }
     public SudokuGame(GameConfig config) {
         this.board = new SudokuBoard(config.getSize());
         this.scanner = new Scanner(System.in);
         this.playWithTimer = config.isPlayWithTimer();
         this.timer = new Timer();
         this.moves = new ArrayList<>();
+        this.moveHistory = new MoveHistory();
+    }
+
+    public void clearBoard() {
+        board = new SudokuBoard(board.getSize());
+        moves.clear();
+        generatedCells = new boolean[board.getSize()][board.getSize()];
+        moveHistory = new MoveHistory();
     }
 
     public void startGame(GameConfig config) {
@@ -57,32 +60,32 @@ public class SudokuGame {
             System.out.println("\nCurrent board:");
             board.printBoard(generatedCells); // Pass the generatedCells array as an argument
 
-            System.out.println("Enter your move (row column value), 'solve' to solve the puzzle, or 'q' to quit:");
+            System.out.println("Enter your move (row column value)\n'solve' to solve the puzzle\n'q' to quit\n'u' to undo\n'r' to redo:");
+            System.out.println("Remaining moves: " + getRemainingMoves());
 
             // Read user input asynchronously
-            String input = null;
-            if (scanner.hasNextLine()) {
-                input = scanner.nextLine();
-            }
+            String input = scanner.nextLine();
 
-            if (input != null) {
-                if (input.equalsIgnoreCase("q")) {
-                    System.out.println("Quitting the game.");
-                    if (playWithTimer) {
-                        timer.stop();
-                    }
-                    break;
-                } else if (input.equalsIgnoreCase("solve")) {
-                    solveBoard();
-                    if (playWithTimer) {
-                        timer.stop();
-                    }
-                    break;
+            if (input.equalsIgnoreCase("q")) {
+                System.out.println("Quitting the game.");
+                if (playWithTimer) {
+                    timer.stop();
                 }
-
+                break;
+            } else if (input.equalsIgnoreCase("solve")) {
+                solveBoard();
+                if (playWithTimer) {
+                    timer.stop();
+                }
+                break;
+            } else if (input.equalsIgnoreCase("u")) {
+                undo();
+            } else if (input.equalsIgnoreCase("r")) {
+                redo();
+            } else {
                 Move move = parseMove(input);
                 if (move != null) {
-                    moves.add(move); // Add the move to the replay only if it's not null
+                    moveHistory.addMove(move); // Add the move to the replay only if it's not null
                     int row = move.getRow();
                     int col = move.getCol();
                     if (!generatedCells[row][col]) { // Check if the cell is empty
@@ -132,7 +135,7 @@ public class SudokuGame {
             case 3:
                 // Load and replay saved game
                 Replay loadedReplay = loadReplay();
-                if (loadedReplay!= null) {
+                if (loadedReplay != null) {
                     loadAndReplayGame(loadedReplay, board.getBoard());
                 }
                 break;
@@ -151,7 +154,8 @@ public class SudokuGame {
         System.out.println("1. Easy");
         System.out.println("2. Medium");
         System.out.println("3. Hard");
-        System.out.print("Enter the number corresponding to your choice: ");        int difficulty = scanner.nextInt();
+        System.out.print("Enter the number corresponding to your choice: ");
+        int difficulty = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
 
         System.out.print("Do you want to play with a timer? (0 - no / 1 - yes): ");
@@ -212,6 +216,18 @@ public class SudokuGame {
                 System.out.println("Invalid choice. Exiting the game.");
                 break;
         }
+    }
+
+    private int getRemainingMoves() {
+        int remainingMoves = 0;
+        for (int i = 0; i < board.getSize(); i++) {
+            for (int j = 0; j < board.getSize(); j++) {
+                if (board.getCellValue(i, j) == 0) {
+                    remainingMoves++;
+                }
+            }
+        }
+        return remainingMoves;
     }
 
     private Replay loadReplay() {
@@ -426,5 +442,24 @@ public class SudokuGame {
         }
         return true;
     }
-}
 
+    public void undo() {
+        Move lastMove = moveHistory.undo();
+        if (lastMove != null) {
+            board.setCellValue(lastMove.getRow(), lastMove.getCol(), 0);
+            System.out.println("Undo completed");
+        } else {
+            System.out.println("No moves to undo.");
+        }
+    }
+
+    public void redo() {
+        Move lastUndoneMove = moveHistory.redo();
+        if (lastUndoneMove != null) {
+            board.setCellValue(lastUndoneMove.getRow(), lastUndoneMove.getCol(), lastUndoneMove.getValue());
+            System.out.println("Redo completed");
+        } else {
+            System.out.println("No moves to redo.");
+        }
+    }
+}
