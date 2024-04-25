@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -24,18 +25,8 @@ public class SudokuGame {
         this.moves = new ArrayList<>();
     }
 
-    public void startGame() {
+    public void startGame(GameConfig config) {
         System.out.println("Welcome to Sudoku!");
-
-        // Prompt the user to choose whether to play with a timer
-
-
-        // Start the timer thread if the player chose to play with it
-//        if (playWithTimer) {
-//            timer.start();
-//        }
-
-        GameConfig config = new GameConfig(9, chooseDifficulty(), chooseTimerOption());
 
         SudokuGenerator generator = new SudokuGenerator(config);
         int[][] sudokuGrid = generator.getSudokuGrid();
@@ -288,29 +279,6 @@ public class SudokuGame {
             }
         }
     }
-
-    private boolean chooseTimerOption() {
-        System.out.println("Do you want to play with a timer? (0 - no / 1 - yes)");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline character
-
-        return choice == 1;
-    }
-
-
-    private int chooseDifficulty() {
-        System.out.println("Choose difficulty level:");
-        System.out.println("1. Easy");
-        System.out.println("2. Medium");
-        System.out.println("3. Hard");
-        System.out.print("Enter the number corresponding to your choice: ");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline character
-        return choice;
-    }
-
     private Move parseMove(String input) {
         Pattern pattern = Pattern.compile("(\\d+) (\\d+) (\\d+)");
         Matcher matcher = pattern.matcher(input);

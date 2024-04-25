@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 public class GameUtils {
-    private static final Scanner scanner = new Scanner(System.in);
+    static final Scanner scanner = new Scanner(System.in);
 
     // Method to get user input for integer values
     public static int getUserInput(String message) {
