@@ -1,7 +1,15 @@
+/**
+ * Represents a Sudoku board with a given size.
+ */
 public class SudokuBoard {
     private int[][] board;
     private final int size; // Size of the Sudoku grid (e.g., 9 for standard Sudoku)
 
+    /**
+     * Constructs a new SudokuBoard object with a given size.
+     *
+     * @param size the size of the Sudoku grid (e.g., 9 for standard Sudoku)
+     */
     public SudokuBoard(int size) {
         this.size = size;
         this.board = new int[size][size];
@@ -13,12 +21,25 @@ public class SudokuBoard {
         }
     }
 
-    // Get the value of a cell in the board
+    /**
+     * Returns the value of a cell in the board.
+     *
+     * @param row the row of the cell
+     * @param col the column of the cell
+     * @return the value of the cell
+     */
     public int getCellValue(int row, int col) {
         return board[row][col];
     }
 
-    // Set the value of a cell in the board
+    /**
+     * Sets the value of a cell in the board.
+     *
+     * @param row   the row of the cell
+     * @param col   the column of the cell
+     * @param value the value to place in the cell
+     * @throws IllegalArgumentException if the cell or value is invalid
+     */
     public void setCellValue(int row, int col, int value) {
         if (!isValidCell(row, col) || !isValidValue(value)) {
             throw new IllegalArgumentException("Invalid cell or value");
@@ -26,17 +47,35 @@ public class SudokuBoard {
         board[row][col] = value;
     }
 
-    // Check if a cell coordinate is valid
+    /**
+     * Checks if a cell coordinate is valid.
+     *
+     * @param row the row of the cell
+     * @param col the column of the cell
+     * @return true if the cell coordinate is valid, false otherwise
+     */
     private boolean isValidCell(int row, int col) {
         return row >= 0 && row < size && col >= 0 && col < size;
     }
 
-    // Check if a value is valid for a cell
+    /**
+     * Checks if a value is valid for a cell.
+     *
+     * @param value the value to place in the cell
+     * @return true if the value is valid, false otherwise
+     */
     private boolean isValidValue(int value) {
         return value >= 0 && value <= size;
     }
 
-    // Check if a move is valid
+    /**
+     * Checks if a move is valid.
+     *
+     * @param row   the row of the cell
+     * @param col   the column of the cell
+     * @param value the value to place in the cell
+     * @return true if the move is valid, false otherwise
+     */
     public boolean isValidMove(int row, int col, int value) {
         if (!isValidCell(row, col) || !isValidValue(value)) {
             return false;
@@ -48,7 +87,13 @@ public class SudokuBoard {
                 !isValueInSubgrid(row - row % 3, col - col % 3, value);
     }
 
-    // Check if a value exists in the row
+    /**
+     * Checks if a value exists in the row.
+     *
+     * @param row   the row of the cell
+     * @param value the value to check
+     * @return true if the value exists in the row, false otherwise
+     */
     private boolean isValueInRow(int row, int value) {
         for (int col = 0; col < size; col++) {
             if (board[row][col] == value) {
@@ -58,7 +103,13 @@ public class SudokuBoard {
         return false;
     }
 
-    // Check if a value exists in the column
+    /**
+     * Checks if a value exists in the column.
+     *
+     * @param col   the column of the cell
+     * @param value the value to check
+     * @return true if the value exists in the column, false otherwise
+     */
     private boolean isValueInColumn(int col, int value) {
         for (int row = 0; row < size; row++) {
             if (board[row][col] == value) {
@@ -68,7 +119,14 @@ public class SudokuBoard {
         return false;
     }
 
-    // Check if a value exists in the 3x3 subgrid
+    /**
+     * Checks if a value exists in the 3x3 subgrid.
+     *
+     * @param startRow the starting row of the subgrid
+     * @param startCol the starting column of the subgrid
+     * @param value    the value to check
+     * @return true if the value exists in the subgrid, false otherwise
+     */
     private boolean isValueInSubgrid(int startRow, int startCol, int value) {
         for (int row = startRow; row < startRow + 3; row++) {
             for (int col = startCol; col < startCol + 3; col++) {
@@ -80,23 +138,33 @@ public class SudokuBoard {
         return false;
     }
 
-    // Get the size of the board
+    /**
+     * Returns the size of the board.
+     *
+     * @return the size of the board
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * Returns a copy of the board.
+     *
+     * @return a copy of the board
+     */
     public int[][] getBoard() {
         int[][] copy = new int[size][size];
         for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                copy[i][j] = board[i][j];
-            }
+            System.arraycopy(board[i], 0, copy[i], 0, size);
         }
         return copy;
     }
 
-    // Method to set the entire board
-    public void setBoard(int[][] newBoard) {
+    /**
+     * Sets the entire board.
+     *
+     * @param newBoard the new board to set
+     */    public void setBoard(int[][] newBoard) {
         if (newBoard.length == size && newBoard[0].length == size) {
             this.board = newBoard;
         } else {
@@ -104,8 +172,11 @@ public class SudokuBoard {
         }
     }
 
-    // Method to print the board
-    public void printBoard(boolean[][] generatedCells) {
+    /**
+     * Prints the board to the console.
+     *
+     * @param generatedCells a 2D boolean array indicating which cells were generated (pre-filled)
+     */    public void printBoard(boolean[][] generatedCells) {
         // Print column numbers
         System.out.print("  ");
         for (int i = 0; i < size; i++) {

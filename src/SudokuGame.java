@@ -7,16 +7,57 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The SudokuGame class represents the main game logic for a Sudoku game.
+ * It includes methods for starting a new game, handling user input, and managing game state.
+ */
 public class SudokuGame {
+
+    /**
+     * The SudokuBoard object representing the current game board.
+     */
     private SudokuBoard board;
+
+    /**
+     * The Scanner object used for reading user input.
+     */
     private final Scanner scanner;
+
+    /**
+     * A boolean value indicating whether the game is being played with a timer.
+     */
     private final boolean playWithTimer;
+
+    /**
+     * The Timer object used for tracking elapsed time when playing with a timer.
+     */
     private final Timer timer;
+
+    /**
+     * A 2D boolean array indicating which cells on the board were generated (pre-filled) at the start of the game.
+     */
     private boolean[][] generatedCells;
+
+    /**
+     * A List of Move objects representing the moves made during the game.
+     */
     private final List<Move> moves;
+
+    /**
+     * A 2D integer array representing the initial state of the board at the start of the game.
+     */
     private int[][] startBoard;
+
+    /**
+     * A MoveHistory object representing the history of moves made during the game.
+     */
     private MoveHistory moveHistory;
 
+    /**
+     * Constructs a new SudokuGame object with the given GameConfig object.
+     *
+     * @param config The GameConfig object containing the game configuration settings.
+     */
     public SudokuGame(GameConfig config) {
         this.board = new SudokuBoard(config.getSize());
         this.scanner = new Scanner(System.in);
@@ -26,6 +67,9 @@ public class SudokuGame {
         this.moveHistory = new MoveHistory();
     }
 
+    /**
+     * Clears the board and resets the game state.
+     */
     public void clearBoard() {
         board = new SudokuBoard(board.getSize());
         moves.clear();
@@ -33,6 +77,11 @@ public class SudokuGame {
         moveHistory = new MoveHistory();
     }
 
+    /**
+     * Starts a new game with the given configuration.
+     *
+     * @param config the game configuration
+     */
     public void startGame(GameConfig config) {
         clearBoard(); // Clear the board before starting a new game
         System.out.println("Welcome to Sudoku!");
@@ -142,6 +191,7 @@ public class SudokuGame {
             case 4:
                 // Exit
                 System.out.println("Exiting the game. Goodbye!");
+                GameUtils.closeScanner();
                 break;
             default:
                 System.out.println("Invalid choice. Exiting the game.");
@@ -149,6 +199,11 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Returns a new GameConfig object based on user input.
+     *
+     * @return a new GameConfig object
+     */
     private GameConfig getNewGameConfig() {
         System.out.println("Choose difficulty level:");
         System.out.println("1. Easy");
@@ -165,6 +220,11 @@ public class SudokuGame {
         return new GameConfig(9, difficulty, playWithTimer);
     }
 
+    /**
+     * Saves or displays a replay of the game.
+     *
+     * @param replay the replay data
+     */
     void saveOrDisplayReplay(Replay replay) {
         System.out.println("1. Save replay");
         System.out.println("2. Load and replay saved game");
@@ -218,6 +278,11 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Returns the number of remaining moves in the game.
+     *
+     * @return the number of remaining moves
+     */
     private int getRemainingMoves() {
         int remainingMoves = 0;
         for (int i = 0; i < board.getSize(); i++) {
@@ -230,6 +295,11 @@ public class SudokuGame {
         return remainingMoves;
     }
 
+    /**
+     * Loads a replay from a file.
+     *
+     * @return the loaded replay data, or null if loading fails
+     */
     private Replay loadReplay() {
         // Prompt the user to enter the filename of the saved replay
         System.out.print("Enter the filename of the saved replay: ");
@@ -298,6 +368,11 @@ public class SudokuGame {
         return new Replay(initialBoard, moves, elapsedTime);
     }
 
+    /**
+     * Initializes the generatedCells array based on the initial board state.
+     *
+     * @param initialBoard the initial board state
+     */
     private void getGeneratedCells(int[][] initialBoard) {
         generatedCells = new boolean[board.getSize()][board.getSize()];
         for (int i = 0; i < board.getSize(); i++) {
@@ -307,6 +382,11 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Prints the board to the console.
+     *
+     * @param board the board to print
+     */
     private void printBoard(int[][] board) {
         // Print column numbers
         System.out.print("  ");
@@ -354,6 +434,12 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Loads and replays a game from a saved replay.
+     *
+     * @param replay       the replay data
+     * @param initialBoard the initial board state
+     */
     private void loadAndReplayGame(Replay replay, int[][] initialBoard) {
         // Reset the board to its initial state
         board.setBoard(initialBoard);
@@ -376,6 +462,12 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Parses a user input string into a Move object.
+     *
+     * @param input the user input string
+     * @return the parsed Move object, or null if parsing fails
+     */
     private Move parseMove(String input) {
         Pattern pattern = Pattern.compile("(\\d+) (\\d+) (\\d+)");
         Matcher matcher = pattern.matcher(input);
@@ -396,6 +488,11 @@ public class SudokuGame {
         return null;
     }
 
+    /**
+     * Populates the board with the given Sudoku grid.
+     *
+     * @param sudokuGrid the Sudoku grid
+     */
     private void populateBoard(int[][] sudokuGrid) {
         int size = board.getSize();
         for (int i = 0; i < size; i++) {
@@ -408,6 +505,9 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Solves the Sudoku puzzle using a SudokuSolver.
+     */
     private void solveBoard() {
         System.out.println("\nSolving the Sudoku puzzle...\n");
         SudokuSolver solver = new SudokuSolver(board.getBoard());
@@ -419,6 +519,11 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Checks if the game is finished (i.e., all cells are filled and the board is valid).
+     *
+     * @return true if the game is finished, false otherwise
+     */
     private boolean isGameFinished() {
         // Check if all cells are filled
         for (int i = 0; i < board.getSize(); i++) {
@@ -443,6 +548,9 @@ public class SudokuGame {
         return true;
     }
 
+    /**
+     * Undoes the last move in the game history.
+     */
     public void undo() {
         Move lastMove = moveHistory.undo();
         if (lastMove != null) {
@@ -453,6 +561,9 @@ public class SudokuGame {
         }
     }
 
+    /**
+     * Redoes the last undone move in the game history.
+     */
     public void redo() {
         Move lastUndoneMove = moveHistory.redo();
         if (lastUndoneMove != null) {

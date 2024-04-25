@@ -1,9 +1,17 @@
 import java.util.Scanner;
 
+/**
+ * Utility class for Sudoku game operations.
+ */
 public class GameUtils {
     static final Scanner scanner = new Scanner(System.in);
 
-    // Method to get user input for integer values
+    /**
+     * Gets user input for integer values.
+     *
+     * @param message the message to display to the user
+     * @return the user's input as an integer
+     */
     public static int getUserInput(String message) {
         System.out.print(message + ": ");
         while (true) {
@@ -15,12 +23,9 @@ public class GameUtils {
         }
     }
 
-    // Method to validate user input for cell coordinates
-    public static boolean isValidCellInput(int input, int boardSize) {
-        return input >= 0 && input < boardSize;
-    }
-
-    // Close the scanner to release resources
+    /**
+     * Closes the scanner to release resources.
+     */
     public static void closeScanner() {
         scanner.close();
     }

@@ -1,4 +1,14 @@
+/**
+ * The Main class serves as the entry point for the Sudoku game application.
+ * It provides a command-line interface for users to start a new game or watch a replay.
+ */
 public class Main {
+
+    /**
+     * The main method initializes the Sudoku game based on user input.
+     *
+     * @param args Command-line arguments (not used in this implementation).
+     */
     public static void main(String[] args) {
         System.out.println("Welcome to Sudoku!");
         System.out.println("1. Play a new game");
@@ -18,6 +28,11 @@ public class Main {
         }
     }
 
+    /**
+     * getUserChoice is a helper method that gets the user's choice between playing a new game or watching a replay.
+     *
+     * @return The user's choice as an integer (1 or 2).
+     */
     private static int getUserChoice() {
         while (true) {
             int choice = GameUtils.getUserInput("Enter the number corresponding to your choice");
@@ -29,6 +44,11 @@ public class Main {
         }
     }
 
+    /**
+     * getDifficultyChoice is a helper method that gets the user's desired difficulty level for a new game.
+     *
+     * @return The difficulty level as an integer (1, 2, 3, or a custom negative value).
+     */
     private static int getDifficultyChoice() {
         while (true) {
             System.out.println("Choose difficulty level");
@@ -53,6 +73,11 @@ public class Main {
         }
     }
 
+    /**
+     * getTimerOption is a helper method that gets the user's preference for using a timer during the game.
+     *
+     * @return true if the user wants to play with a timer, false otherwise.
+     */
     private static boolean getTimerOption() {
         while (true) {
             int choice = GameUtils.getUserInput("Do you want to play with a timer? (0 - no / 1 - yes)");
