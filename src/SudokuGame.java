@@ -1,4 +1,3 @@
-import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -9,14 +8,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SudokuGame {
-    private final SudokuBoard board;
+    private SudokuBoard board;
     private final Scanner scanner;
-    private boolean playWithTimer;
-    private Timer timer;
+    private final boolean playWithTimer;
+    private final Timer timer;
     private boolean[][] generatedCells;
     private final List<Move> moves;
     private int[][] startBoard;
 
+
+    public void clearBoard() {
+        board = new SudokuBoard(board.getSize());
+        moves.clear();
+        generatedCells = new boolean[board.getSize()][board.getSize()];
+    }
     public SudokuGame(GameConfig config) {
         this.board = new SudokuBoard(config.getSize());
         this.scanner = new Scanner(System.in);
@@ -26,18 +31,20 @@ public class SudokuGame {
     }
 
     public void startGame(GameConfig config) {
+        clearBoard(); // Clear the board before starting a new game
         System.out.println("Welcome to Sudoku!");
 
         SudokuGenerator generator = new SudokuGenerator(config);
         int[][] sudokuGrid = generator.getSudokuGrid();
         populateBoard(sudokuGrid);
         startBoard = board.getBoard();
+
         // Initialize generatedCells array
-        generatedCells = new boolean[board.getSize()][board.getSize()];
-        for (int i = 0; i < board.getSize(); i++) {
-            for (int j = 0; j < board.getSize(); j++) {
-                generatedCells[i][j] = sudokuGrid[i][j] != 0;
-            }
+        getGeneratedCells(sudokuGrid);
+
+        // Initialize elapsed time
+        if (playWithTimer) {
+            timer.start();
         }
 
         // Game loop
@@ -61,13 +68,13 @@ public class SudokuGame {
             if (input != null) {
                 if (input.equalsIgnoreCase("q")) {
                     System.out.println("Quitting the game.");
-                    if (playWithTimer && timer != null) {
+                    if (playWithTimer) {
                         timer.stop();
                     }
                     break;
                 } else if (input.equalsIgnoreCase("solve")) {
                     solveBoard();
-                    if (playWithTimer && timer != null) {
+                    if (playWithTimer) {
                         timer.stop();
                     }
                     break;
@@ -88,29 +95,73 @@ public class SudokuGame {
                 }
             }
         }
-// Create a Replay object after the game is finished
+
+        // Stop the timer and get the elapsed time
+        // Add elapsedTime as a class-level variable
         String elapsedTime;
         if (playWithTimer) {
-            assert timer != null;
+            timer.stop();
             elapsedTime = timer.getElapsedTime();
         } else {
             elapsedTime = "0 minutes and 0 seconds";
         }
-        Replay replay = new Replay(moves, elapsedTime);
 
-        // Display congratulations message
-        System.out.println("Congratulations! You've completed the Sudoku puzzle.");
+        // After the game is finished, prompt the user for next action
+        System.out.println("Game over!");
+        System.out.println("1. Play another game");
+        System.out.println("2. Save current replay");
+        System.out.println("3. Load and replay saved game");
+        System.out.println("4. Exit");
+        System.out.print("Enter the number corresponding to your choice: ");
 
-        // Print elapsed time after the game is finished
-        if (playWithTimer) {
-            System.out.printf("\nElapsed time: %s", elapsedTime);
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        switch (choice) {
+            case 1:
+                // Play another game
+                System.out.println("Enter a new game configuration:");
+                config = getNewGameConfig();
+                System.out.println("Starting a new game...");
+                startGame(config);
+                break;
+            case 2:
+                // Save current replay
+                saveOrDisplayReplay(new Replay(moves, elapsedTime));
+                break;
+            case 3:
+                // Load and replay saved game
+                Replay loadedReplay = loadReplay();
+                if (loadedReplay!= null) {
+                    loadAndReplayGame(loadedReplay, board.getBoard());
+                }
+                break;
+            case 4:
+                // Exit
+                System.out.println("Exiting the game. Goodbye!");
+                break;
+            default:
+                System.out.println("Invalid choice. Exiting the game.");
+                break;
         }
-
-        // Save the replay or display replay options
-        saveOrDisplayReplay(replay);
     }
 
-    private void saveOrDisplayReplay(Replay replay) {
+    private GameConfig getNewGameConfig() {
+        System.out.println("Choose difficulty level:");
+        System.out.println("1. Easy");
+        System.out.println("2. Medium");
+        System.out.println("3. Hard");
+        System.out.print("Enter the number corresponding to your choice: ");        int difficulty = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        System.out.print("Do you want to play with a timer? (0 - no / 1 - yes): ");
+        boolean playWithTimer = scanner.nextInt() == 1;
+        scanner.nextLine(); // Consume newline character
+
+        return new GameConfig(9, difficulty, playWithTimer);
+    }
+
+    void saveOrDisplayReplay(Replay replay) {
         System.out.println("1. Save replay");
         System.out.println("2. Load and replay saved game");
         System.out.println("3. Exit");
@@ -128,9 +179,9 @@ public class SudokuGame {
                 // Save the initial board state and the replay data
                 try (PrintWriter writer = new PrintWriter(filename + ".txt")) {
                     // Write the initial board state to the first lines of the file
-                    for (int i = 0; i < startBoard.length; i++) {
-                        for (int j = 0; j < startBoard[i].length; j++) {
-                            writer.printf("%d ", startBoard[i][j]);
+                    for (int[] ints : startBoard) {
+                        for (int anInt : ints) {
+                            writer.printf("%d ", anInt);
                         }
                         writer.println();
                     }
@@ -138,7 +189,7 @@ public class SudokuGame {
                     // Write the elapsed time and moves data to the remaining lines of the file
                     writer.println(replay.getElapsedTime());
                     for (Move move : replay.getMoves()) {
-                        writer.printf("%d %d %d\n",move.getRow(), move.getCol(), move.getValue());
+                        writer.printf("%d %d %d\n", move.getRow(), move.getCol(), move.getValue());
                     }
                 } catch (FileNotFoundException e) {
                     System.out.println("Error: File not found.");
@@ -176,20 +227,21 @@ public class SudokuGame {
             return null;
         }
 
-        int[][] board = new int[9][9];
+        int[][] initialBoard = new int[9][9];
         List<Move> moves = new ArrayList<>();
-        String elapsedTime = "";
+        String elapsedTime;
 
         try (Scanner fileScanner = new Scanner(file)) {
             // Read the sudoku board data
             for (int i = 0; i < 9; i++) {
                 String[] rowData = fileScanner.nextLine().split(" ");
                 for (int j = 0; j < 9; j++) {
-                    board[i][j] = Integer.parseInt(rowData[j]);
+                    initialBoard[i][j] = Integer.parseInt(rowData[j]);
                 }
             }
             System.out.println("Loaded Sudoku Board:");
-            printBoard(board);
+            printBoard(initialBoard);
+
             // Read the elapsed time line
             elapsedTime = fileScanner.nextLine();
 
@@ -209,8 +261,34 @@ public class SudokuGame {
             return null;
         }
 
+        // Create a new SudokuBoard with the loaded initial board state
+        this.board = new SudokuBoard(9); // Assign the loaded board to the board field
+
+        // Initialize generatedCells array
+        getGeneratedCells(initialBoard);
+
+        // Populate the current board with the loaded data
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (generatedCells[i][j]) {
+                    board.setCellValue(i, j, initialBoard[i][j]);
+                } else {
+                    board.setCellValue(i, j, 0);
+                }
+            }
+        }
+
         // Return the Replay object created from the saved replay data
-        return new Replay(board, moves, elapsedTime);
+        return new Replay(initialBoard, moves, elapsedTime);
+    }
+
+    private void getGeneratedCells(int[][] initialBoard) {
+        generatedCells = new boolean[board.getSize()][board.getSize()];
+        for (int i = 0; i < board.getSize(); i++) {
+            for (int j = 0; j < board.getSize(); j++) {
+                generatedCells[i][j] = initialBoard[i][j] != 0;
+            }
+        }
     }
 
     private void printBoard(int[][] board) {
@@ -279,6 +357,7 @@ public class SudokuGame {
             }
         }
     }
+
     private Move parseMove(String input) {
         Pattern pattern = Pattern.compile("(\\d+) (\\d+) (\\d+)");
         Matcher matcher = pattern.matcher(input);
@@ -343,7 +422,6 @@ public class SudokuGame {
                 board.setCellValue(i, j, value); // Restore the value
             }
         }
-
         return true;
     }
 }

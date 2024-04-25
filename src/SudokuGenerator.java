@@ -97,6 +97,10 @@ public class SudokuGenerator {
     }
 
     private boolean isSubgridValid(int row, int col, int num) {
+        return getSubgridSize(row, col, num, size, grid);
+    }
+
+    static boolean getSubgridSize(int row, int col, int num, int size, int[][] grid) {
         int subgridSize = (int) Math.sqrt(size);
         int startRow = row - row % subgridSize;
         int startCol = col - col % subgridSize;
@@ -133,20 +137,5 @@ public class SudokuGenerator {
 
     public int[][] getSudokuGrid() {
         return grid;
-    }
-
-    private static void printSudokuGrid(int[][] sudokuGrid) {
-        for (int i = 0; i < sudokuGrid.length; i++) {
-            if (i % 3 == 0 && i != 0) {
-                System.out.println("---------------------");
-            }
-            for (int j = 0; j < sudokuGrid[i].length; j++) {
-                if (j % 3 == 0 && j != 0) {
-                    System.out.print("| ");
-                }
-                System.out.print(sudokuGrid[i][j] + " ");
-            }
-            System.out.println();
-        }
     }
 }

@@ -59,16 +59,6 @@ public class SudokuSolver {
     }
 
     private boolean isSubgridValid(int row, int col, int num) {
-        int subgridSize = (int) Math.sqrt(size);
-        int startRow = row - row % subgridSize;
-        int startCol = col - col % subgridSize;
-        for (int i = 0; i < subgridSize; i++) {
-            for (int j = 0; j < subgridSize; j++) {
-                if (board[startRow + i][startCol + j] == num) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return SudokuGenerator.getSubgridSize(row, col, num, size, board);
     }
 }
