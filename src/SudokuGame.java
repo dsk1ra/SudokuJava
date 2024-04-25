@@ -343,13 +343,15 @@ public class SudokuGame {
         board.setBoard(initialBoard);
 
         // Replay the moves
+        int i = 0;
         for (Move move : replay.getMoves()) {
+            i++;
             int row = move.getRow();
             int col = move.getCol();
             System.out.println(board.getCellValue(row, col));
             if (board.isValidMove(row, col, move.getValue())) {
                 board.setCellValue(row, col, move.getValue());
-                System.out.println("Replaying move: " + move);
+                System.out.println("Replaying move: " + i);
                 System.out.println("Current board:");
                 board.printBoard(generatedCells);
             } else {
