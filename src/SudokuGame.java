@@ -5,6 +5,7 @@ public class SudokuGame {
     private Scanner scanner;
     private boolean playWithTimer;
     private TimerThread timerThread;
+    private boolean[][] generatedCells;
 
     public SudokuGame(int size) {
         this.board = new SudokuBoard(size);
@@ -18,20 +19,34 @@ public class SudokuGame {
         // Prompt the user to choose whether to play with a timer
         chooseTimerOption();
 
-        SudokuGenerator generator = new SudokuGenerator(board.getSize(), chooseDifficulty());
-        int[][] sudokuGrid = generator.getSudokuGrid();
-        populateBoard(sudokuGrid);
-
         // Start the timer thread if the player chose to play with it
         if (playWithTimer) {
             timerThread = new TimerThread();
             timerThread.start();
         }
 
+        SudokuGenerator generator = new SudokuGenerator(board.getSize(), chooseDifficulty());
+        int[][] sudokuGrid = generator.getSudokuGrid();
+        populateBoard(sudokuGrid);
+
+        // Initialize generatedCells array
+        generatedCells = new boolean[board.getSize()][board.getSize()];
+        for (int i = 0; i < board.getSize(); i++) {
+            for (int j = 0; j < board.getSize(); j++) {
+                generatedCells[i][j] = sudokuGrid[i][j] != 0;
+            }
+        }
+
         // Game loop
         while (!isGameFinished()) {
+            // Print elapsed time above the board if playing with timer
+            if (playWithTimer) {
+                System.out.printf("\rTime elapsed: %s", timerThread.getElapsedTime());
+            }
+
             System.out.println("\nCurrent board:");
-            board.printBoard();
+            board.printBoard(generatedCells); // Pass the generatedCells array as an argument
+
             System.out.println("Enter your move (row column value), 'solve' to solve the puzzle, or 'q' to quit:");
 
             // Read user input asynchronously
@@ -57,10 +72,16 @@ public class SudokuGame {
 
                 Move move = parseMove(input);
                 if (move != null) {
-                    if (board.isValidMove(move.getRow(), move.getCol(), move.getValue())) {
-                        board.setCellValue(move.getRow(), move.getCol(), move.getValue());
+                    int row = move.getRow();
+                    int col = move.getCol();
+                    if (!generatedCells[row][col]) { // Check if the cell is empty
+                        if (board.isValidMove(row, col, move.getValue())) {
+                            board.setCellValue(row, col, move.getValue());
+                        } else {
+                            System.out.println("Invalid move! Please try again.");
+                        }
                     } else {
-                        System.out.println("Invalid move! Please try again.");
+                        System.out.println("Cannot modify generated cells!");
                     }
                 } else {
                     System.out.println("Invalid input! Please enter in the format 'row column value'.");
@@ -70,7 +91,13 @@ public class SudokuGame {
 
         // Display congratulations message
         System.out.println("Congratulations! You've completed the Sudoku puzzle.");
+
+        // Print elapsed time after the game is finished
+        if (playWithTimer) {
+            System.out.printf("\nElapsed time: %s", timerThread.getElapsedTime());
+        }
     }
+
 
     private void chooseTimerOption() {
         System.out.println("Do you want to play with a timer? (yes/no)");
@@ -124,7 +151,7 @@ public class SudokuGame {
         if (solvedGrid != null) {
             board.setBoard(solvedGrid); // Update the board with the solved grid
             System.out.println("Solved board:");
-            board.printBoard();
+            board.printBoard(generatedCells);
         }
     }
 
@@ -153,18 +180,17 @@ public class SudokuGame {
         return true;
     }
 
-    private class TimerThread extends Thread {
+    public class TimerThread extends Thread {
         private volatile boolean running = true;
+        private long startTime;
 
         @Override
         public void run() {
-            int seconds = 0;
-
+            startTime = System.currentTimeMillis(); // Start the timer
             while (running) {
-                System.out.print("\rTime elapsed: " + seconds + " seconds");
-                seconds++;
+                // Sleep for 1 second
                 try {
-                    Thread.sleep(1000); // Sleep for 1 second
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -174,7 +200,19 @@ public class SudokuGame {
         public void stopTimer() {
             running = false;
         }
+
+        public String getElapsedTime() {
+            if (running) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                int seconds = (int) (elapsedTime / 1000) % 60;
+                int minutes = (int) (elapsedTime / (1000 * 60)) % 60;
+                return String.format("%d minutes and %d seconds", minutes, seconds);
+            } else {
+                return "0 minutes and 0 seconds";
+            }
+        }
     }
+
 
     public static void main(String[] args) {
         SudokuGame game = new SudokuGame(9); // 9 for standard Sudoku

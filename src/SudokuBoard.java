@@ -84,6 +84,7 @@ public class SudokuBoard {
     public int getSize() {
         return size;
     }
+
     public int[][] getBoard() {
         int[][] copy = new int[size][size];
         for (int i = 0; i < size; i++) {
@@ -93,6 +94,7 @@ public class SudokuBoard {
         }
         return copy;
     }
+
     // Method to set the entire board
     public void setBoard(int[][] newBoard) {
         if (newBoard.length == size && newBoard[0].length == size) {
@@ -103,7 +105,7 @@ public class SudokuBoard {
     }
 
     // Method to print the board
-    public void printBoard() {
+    public void printBoard(boolean[][] generatedCells) {
         // Print column numbers
         System.out.print("  ");
         for (int i = 0; i < size; i++) {
@@ -127,10 +129,14 @@ public class SudokuBoard {
             System.out.print(i + "|");
 
             for (int j = 0; j < size; j++) {
-                if (board[i][j] == 0) {
-                    System.out.print("  ");
-                } else {
-                    System.out.print(board[i][j] + " ");
+                if (generatedCells[i][j]) { // Generated cell
+                    System.out.print("\u001B[34m" + board[i][j] + " " + "\u001B[0m"); // Blue color
+                } else { // User-input cell
+                    if (board[i][j] == 0) { // Check if the cell value is zero
+                        System.out.print("  "); // Print a blank space
+                    } else {
+                        System.out.print("\u001B[32m" + board[i][j] + " " + "\u001B[0m"); // Green color
+                    }
                 }
 
                 if ((j + 1) % 3 == 0 && j < size - 1) {
