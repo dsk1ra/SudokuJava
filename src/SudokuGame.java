@@ -223,9 +223,7 @@ public class SudokuGame {
 
     /**
      * Saves or displays a replay of the game.
-     *
-     * @param replay the replay data
-     */
+     **/
     void saveOrDisplayReplay() {
         System.out.println("1. Save replay");
         System.out.println("2. Load and replay saved game");
