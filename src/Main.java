@@ -1,4 +1,5 @@
 /**
+ * Author: Denys Skira
  * The Main class serves as the entry point for the Sudoku game application.
  * It provides a command-line interface for users to start a new game or watch a replay.
  */
