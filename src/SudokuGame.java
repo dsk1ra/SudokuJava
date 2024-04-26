@@ -123,6 +123,7 @@ public class SudokuGame {
                 break;
             } else if (input.equalsIgnoreCase("solve")) {
                 solveBoard();
+                System.out.printf("Time elapsed: %s \n", timer.getElapsedTime());
                 if (playWithTimer) {
                     timer.stop();
                 }
