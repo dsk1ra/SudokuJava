@@ -24,7 +24,7 @@ public class Main {
             game.startGame(config);
         } else if (choice == 2) {
             SudokuGame game = new SudokuGame(new GameConfig(9, 1, false)); // dummy config
-            game.saveOrDisplayReplay(null); // pass null to load a replay
+            game.saveOrDisplayReplay(); // pass null to load a replay
         }
     }
 
@@ -60,9 +60,9 @@ public class Main {
             if (difficulty >= 1 && difficulty <= 3) {
                 return difficulty;
             } else if (difficulty == 4) {
-                System.out.println("Custom difficulty chosen. Enter the percentage of the board you want to be filled (0-90):");
+                System.out.println("Custom difficulty chosen. Enter the percentage of the board you want to be filled (10-90):");
                 int percentage = GameUtils.getUserInput("Enter the percentage");
-                if (percentage >= 10 && percentage <= 90) {
+                if (percentage >= 10 && percentage <= 98) {
                     return -1 * percentage; // return a negative value to indicate custom difficulty
                 } else {
                     System.out.println("Invalid percentage. Please enter a number between 10 and 90.");

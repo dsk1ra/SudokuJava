@@ -180,7 +180,7 @@ public class SudokuGame {
                 break;
             case 2:
                 // Save current replay
-                saveOrDisplayReplay(new Replay(moves, elapsedTime));
+                saveOrDisplayReplay();
                 break;
             case 3:
                 // Load and replay saved game
@@ -226,7 +226,7 @@ public class SudokuGame {
      *
      * @param replay the replay data
      */
-    void saveOrDisplayReplay(Replay replay) {
+    void saveOrDisplayReplay() {
         System.out.println("1. Save replay");
         System.out.println("2. Load and replay saved game");
         System.out.println("3. Exit");
@@ -251,9 +251,11 @@ public class SudokuGame {
                         writer.println();
                     }
 
-                    // Write the elapsed time and moves data to the remaining lines of the file
-                    writer.println(replay.getElapsedTime());
-                    for (Move move : replay.getMoves()) {
+                    // Write the elapsed time
+                    writer.println(timer.getElapsedTime());
+
+                    // Write the moves in the format "row col val"
+                    for (Move move : moveHistory.moves) {
                         writer.printf("%d %d %d\n", move.getRow(), move.getCol(), move.getValue());
                     }
                 } catch (FileNotFoundException e) {

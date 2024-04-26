@@ -4,7 +4,7 @@ import java.util.List;
  * Represents a history of moves made in a game.
  */
 public class MoveHistory {
-    private List<Move> moves;
+    List<Move> moves;
     private List<Move> undoneMoves;
     /**
      * Constructs a new MoveHistory object.
